@@ -122,7 +122,17 @@ def render_sidebar():
             <div class="s-row"><span class="s-lbl">Turns</span><span class="s-val">{turns}</span></div>
             <div class="s-row"><span class="s-lbl">Memory</span><span class="s-val">{mem} msgs</span></div>
             <div class="s-row"><span class="s-lbl">Topic</span><span class="s-val">{topic}</span></div>
-            <div class="s-row"><span class="s-lbl">Status</span><span class="s-val"><span class="{dot}"></span>{status}</span></div>
+        </div>""",
+            unsafe_allow_html=True,
+        )
+
+        # ── Card 4: Integrations ──
+        whatsapp_icon = '<img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:14px;height:14px;margin-right:6px;vertical-align:-2px;">'
+        st.markdown(
+            f"""<div class="s-card s-card-4" style="animation-delay: 0.6s;">
+            <p class="s-title"><span class="s-title-icon">&#9842;</span> Integrations</p>
+            <div class="s-row"><span class="s-lbl">Webhook</span><span class="s-val">Port 8000</span></div>
+            <div class="s-row"><span class="s-lbl">{whatsapp_icon}WhatsApp</span><span class="s-val"><span class="status-dot green"></span>Active</span></div>
         </div>""",
             unsafe_allow_html=True,
         )

@@ -8,3 +8,6 @@ faiss-cpu
 streamlit>=1.40.0
 python-dotenv>=1.0.0
 typing-extensions>=4.9.0
+fastapi>=0.104.0
+uvicorn>=0.23.0
+requests>=2.31.0

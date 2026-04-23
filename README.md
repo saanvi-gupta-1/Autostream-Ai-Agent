@@ -1,243 +1,104 @@
-# AutoStream AI Sales Agent — Aria
+# AutoStream AI Sales Agent
 
-> **Social-to-Lead Agentic Workflow** | ServiceHive x Inflx ML Internship Assignment
+AutoStream AI is a production-grade conversational sales agent built to automate lead generation and handle customer inquiries. Powered by large language models and vector database retrieval, the agent autonomously answers product questions, detects high-intent users, and seamlessly transitions into a lead capture workflow. 
 
-A production-grade conversational AI agent that handles product queries, detects high-intent users, and captures qualified leads — powered by **Llama 3.3 70B (Groq)**, **LangGraph**, **FAISS vector search**, and a **Streamlit chat interface**.
-
----
-
-## Table of Contents
-
-1. [Demo](#demo)
-2. [Features](#features)
-3. [Project Structure](#project-structure)
-4. [How to Run Locally](#how-to-run-locally)
-5. [Architecture Explanation](#architecture-explanation)
-6. [Conversation Flow](#conversation-flow)
-7. [WhatsApp Deployment via Webhooks](#whatsapp-deployment-via-webhooks)
-8. [Evaluation Checklist](#evaluation-checklist)
+It features a high-performance Streamlit dashboard for web interactions and includes a complete FastAPI backend infrastructure for deployment to the Meta WhatsApp Business API.
 
 ---
 
-## Demo
+## Technical Stack
 
-> Watch the 2-3 minute screen recording in `demo/demo_video.mp4`
-
-The demo covers:
-1. Agent answering a pricing question using RAG retrieval
-2. Agent detecting high-intent and shifting to lead qualification
-3. Sequential collection of name, email, and platform
-4. Successful `mock_lead_capture()` execution with confirmation banner
-
----
-
-## Features
-
-| Capability | Implementation |
-|---|---|
-| **Intent Detection** | LLM-based classification (Llama 3.1 8B via Groq) with regex fallback |
-| **RAG Pipeline** | FAISS vector store + Google `text-embedding-004` embeddings |
-| **Multi-turn Memory** | LangGraph `AgentState` TypedDict persisted across turns |
-| **Lead Scoring** | Three-tier scoring system (Low / Medium / High) |
-| **Lead Collection** | Sequential one-field-at-a-time conversational flow |
-| **Email Validation** | Regex validation before lead capture execution |
-| **Tool Execution** | `mock_lead_capture()` triggered only when all 3 fields are valid |
-| **Platform Personalization** | Responses tailored to user's content platform |
-| **Streamlit UI** | Chat bubbles, live sidebar state, lead capture banner |
-| **CLI Interface** | Terminal-based chat with state inspection |
+*   **Core Logic:** Python 3.9+
+*   **Orchestration:** LangGraph (StateGraph for deterministic multi-turn conversations)
+*   **Chat Model:** Llama 3.3 70B Versatile (via Groq)
+*   **Intent Classification:** Llama 3.1 8B Instant (via Groq)
+*   **Retrieval-Augmented Generation (RAG):** FAISS Vector Store
+*   **Embeddings:** Google text-embedding-004
+*   **Web Dashboard:** Streamlit (with custom premium CSS architecture)
+*   **WhatsApp Backend:** FastAPI, Uvicorn, Requests
 
 ---
 
-## Project Structure
+## Capabilities and Supported Queries
 
-```
-autostream-agent/
-|
-|-- app.py                     # CLI entry point
-|-- streamlit_app.py           # Streamlit chat interface
-|-- agent_logic.py             # LangGraph StateGraph, nodes, routing
-|-- intent.py                  # LLM + regex intent classification, lead scoring
-|-- rag_pipeline.py            # FAISS vector store, embeddings, retrieval
-|-- tools.py                   # mock_lead_capture(), email validation
-|
-|-- knowledge_base/
-|   +-- autostream_kb.json     # Product pricing, policies, FAQ
-|
-|-- requirements.txt
-|-- .env.example
-+-- README.md
-```
+The agent is designed to handle a wide range of customer interactions dynamically:
+
+### 1. General Product Inquiries
+The agent uses RAG to pull accurate information from the internal knowledge base.
+*   "What are the differences between the Basic and Pro plans?"
+*   "Do you offer a free trial?"
+*   "What is your refund policy?"
+
+### 2. Intent Detection and Lead Scoring
+The system continuously analyzes user input to calculate a "Lead Score" (Low, Medium, or High). When a user exhibits buying intent, the agent automatically pivots from answering questions to collecting lead information.
+
+### 3. Sequential Lead Capture
+Upon detecting high intent, the agent initiates a strict data collection workflow:
+*   Collects and validates the user's name (alphabetic characters only).
+*   Collects and validates the user's email address (format verification and disposable domain blocking).
+*   Detects or explicitly asks for the user's primary content platform.
+*   Executes the `mock_lead_capture` backend function only when all constraints are met.
 
 ---
 
-## How to Run Locally
+## Local Setup and Installation
+
+Follow these instructions to run the web dashboard and the WhatsApp backend locally.
 
 ### Prerequisites
+*   Python 3.9 or higher
+*   Groq API Key
+*   Google AI Studio API Key
 
-- Python 3.9+
-- A [Groq API Key](https://console.groq.com/keys) (free tier available)
-- A [Google AI Studio API Key](https://aistudio.google.com/apikey) (for embeddings)
-
-### Step 1 — Clone the Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/autostream-agent.git
-cd autostream-agent
-```
-
-### Step 2 — Create a Virtual Environment
-
+### Step 1: Clone and Configure Environment
+1. Clone the repository and navigate to the project directory.
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
-
-# macOS / Linux
+# On Windows:
+.\venv\Scripts\activate
+# On macOS/Linux:
 source venv/bin/activate
-
-# Windows
-venv\Scripts\activate
 ```
-
-### Step 3 — Install Dependencies
-
+3. Install all required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-
-### Step 4 — Configure API Keys
-
+4. Copy the environment template and add your API keys:
 ```bash
 cp .env.example .env
 ```
+Open `.env` and configure `GROQ_API_KEY` and `GOOGLE_API_KEY`.
 
-Open `.env` and add your keys:
-
-```
-GROQ_API_KEY=your_groq_api_key_here
-GOOGLE_API_KEY=your_google_api_key_here
-```
-
-### Step 5 — Run the Agent
-
-**Option A: Streamlit UI (Recommended)**
-
+### Step 2: Run the Web Dashboard
+To launch the visual Streamlit interface:
 ```bash
 streamlit run streamlit_app.py
 ```
+The application will be accessible at `http://localhost:8501`.
 
-This opens a browser-based chat interface at `http://localhost:8501`.
+---
 
-**Option B: CLI Mode**
+## WhatsApp Integration Setup
 
+The repository includes a complete FastAPI backend (`whatsapp_server.py`) designed to interface with the Meta WhatsApp Business Cloud API via webhooks. The backend utilizes the exact same LangGraph logic as the web dashboard and features an in-memory session manager to track conversations across different phone numbers.
+
+### Running the Backend Server
+In a separate terminal window (with the virtual environment activated), start the server:
 ```bash
-python app.py
+uvicorn whatsapp_server:app --reload --port 8000
 ```
+The webhook endpoint will be active at `http://localhost:8000/webhook`.
 
-### Debug Commands (CLI only)
-
-| Command | Description |
-|---|---|
-| `state` | Inspect current lead state and scoring |
-| `exit` / `quit` | End the session |
-
----
-
-## Architecture Explanation
-
-### Why LangGraph?
-
-LangGraph was chosen over AutoGen because it provides **explicit, inspectable state management** via a typed `AgentState` dictionary. Every conversation turn — message history, intent classification, lead fields, scoring, and collection flags — lives in a single state object that flows through all graph nodes deterministically. This makes the agent fully debuggable and prevents premature tool execution, which is critical for a lead-capture workflow.
-
-### How State is Managed
-
-The graph follows a **router-to-worker** architecture:
-
-1. **Router Node** — Classifies intent using a dedicated Llama 3.1 8B call via Groq (with regex fallback), retrieves relevant context from the FAISS vector store via similarity search, detects the user's platform, and computes a lead score.
-2. **Conditional Edge** — Routes to `product_qa`, `lead_qualifier`, or `lead_collector` based on intent classification and current state flags.
-3. **Worker Nodes** — Each node updates state fields (messages, lead info, collection flags) and invokes Llama 3.3 70B via Groq with the full message history plus system directives.
-4. **Tool Execution** — `mock_lead_capture()` fires inside `lead_collector_node` only when all three fields (name, email, platform) are validated. Email format is checked before capture.
-
-The **full message history** persists in `AgentState.messages`, giving the LLM complete context across 5-6+ turns without external memory stores. The RAG pipeline uses Google `text-embedding-004` embeddings with FAISS similarity search to retrieve the most relevant knowledge base chunks per query, falling back to keyword matching if the embedding API is unavailable.
-
----
-
-## Conversation Flow
-
+### Connecting to Meta
+To deploy this integration to a live WhatsApp number:
+1.  Configure the `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, and `WEBHOOK_VERIFY_TOKEN` variables in your `.env` file.
+2.  Expose your local server to the internet using a secure tunnel service like ngrok:
+```bash
+ngrok http 8000
 ```
-User: "Hi, tell me about your pricing."
-  |-- Intent: PRODUCT_INQUIRY (LLM classified via Groq)
-  |-- FAISS retrieves pricing documents from vector store
-  +-- Aria explains Basic ($29/mo) and Pro ($79/mo) plans
+3.  Navigate to the Meta Developer Dashboard for your application.
+4.  Set up the WhatsApp product and enter your ngrok URL (e.g., `https://your-url.ngrok-free.app/webhook`) as the webhook destination.
+5.  Provide the custom verify token you defined in your `.env` file to complete the handshake.
 
-User: "That sounds great, I want to try the Pro plan for my YouTube channel."
-  |-- Intent: HIGH_INTENT_LEAD
-  |-- Platform detected: YouTube (remembered for session)
-  |-- Routes to lead_qualifier_node
-  +-- Aria: "Awesome! I'd love to get you set up. What's your name?"
-
-User: "Rahul Sharma"
-  |-- Intent: LEAD_INFO_RESPONSE (collecting_lead_info=True)
-  |-- lead_name = "Rahul Sharma"
-  +-- Aria: "Great to meet you, Rahul! What's your email address?"
-
-User: "rahul@example.com"
-  |-- Email validated via regex
-  |-- lead_email = "rahul@example.com"
-  |-- lead_platform auto-filled = "Youtube" (from earlier detection)
-  |-- mock_lead_capture("Rahul Sharma", "rahul@example.com", "Youtube") called
-  +-- Aria: "You're all set, Rahul! Our team will reach out within 24 hours!"
-```
-
----
-
-## 8. WhatsApp Integration (REQUIRED)
-
-### WhatsApp Integration (Concept)
-
-The agent can be integrated with WhatsApp using:
-
-- Webhooks via Meta WhatsApp Business API
-- Incoming messages → sent to backend API
-- Backend processes using agent
-- Response sent back via webhook response
-
-This allows real-time conversational lead generation on WhatsApp.
-
----
-
-## Evaluation Checklist
-
-| Criterion | Status | Location |
-|---|---|---|
-| Intent Detection (LLM + fallback) | Done | `intent.py` |
-| RAG with Embeddings + FAISS | Done | `rag_pipeline.py` |
-| Tool Execution (lead capture) | Done | `tools.py` |
-| State Management (5-6 turns) | Done | `agent_logic.py` — LangGraph `AgentState` |
-| Lead Scoring (3 tiers) | Done | `intent.py` — `calculate_lead_score()` |
-| Platform Personalization | Done | `agent_logic.py` — `_build_system_prompt()` |
-| Email Validation | Done | `tools.py` — `validate_email()` |
-| Streamlit UI | Done | `streamlit_app.py` |
-| CLI Interface | Done | `app.py` |
-| requirements.txt | Done | Project root |
-| README with Architecture | Done | This file |
-| WhatsApp Webhook Explanation | Done | Section above |
-| Demo Video | Done | `demo/demo_video.mp4` |
-
----
-
-## Tech Stack
-
-| Component | Technology |
-|---|---|
-| **LLM (Chat)** | Llama 3.3 70B Versatile via Groq |
-| **LLM (Intent)** | Llama 3.1 8B Instant via Groq |
-| **Framework** | LangGraph `StateGraph` with typed state |
-| **Embeddings** | Google `text-embedding-004` |
-| **Vector Store** | FAISS (in-memory, built from local JSON KB) |
-| **RAG Fallback** | Keyword-based retrieval |
-| **UI** | Streamlit with custom CSS |
-| **Memory** | Full message history in `AgentState.messages` |
-| **Language** | Python 3.9+ |
-
----
-
-*Built for the ServiceHive x Inflx ML Internship Assignment*
+The agent will now receive messages from WhatsApp, process them through the LangGraph state machine, and automatically reply to the user.
