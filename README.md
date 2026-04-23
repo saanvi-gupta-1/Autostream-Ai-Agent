@@ -4,7 +4,6 @@ AutoStream AI is a production-grade conversational sales agent built to automate
 
 It features a high-performance Streamlit dashboard for web interactions and includes a complete FastAPI backend infrastructure for deployment to the Meta WhatsApp Business API.
 
----
 
 ## Technical Stack
 
@@ -17,7 +16,7 @@ It features a high-performance Streamlit dashboard for web interactions and incl
 *   **Web Dashboard:** Streamlit (with custom premium CSS architecture)
 *   **WhatsApp Backend:** FastAPI, Uvicorn, Requests
 
----
+
 
 ## Capabilities and Supported Queries
 
@@ -39,7 +38,7 @@ Upon detecting high intent, the agent initiates a strict data collection workflo
 *   Detects or explicitly asks for the user's primary content platform.
 *   Executes the `mock_lead_capture` backend function only when all constraints are met.
 
----
+
 
 ## Local Setup and Installation
 
@@ -48,7 +47,6 @@ Follow these instructions to run the web dashboard and the WhatsApp backend loca
 ### Prerequisites
 *   Python 3.9 or higher
 *   Groq API Key
-*   Google AI Studio API Key
 
 ### Step 1: Clone and Configure Environment
 1. Clone the repository and navigate to the project directory.
@@ -67,8 +65,9 @@ pip install -r requirements.txt
 4. Copy the environment template and add your API keys:
 ```bash
 cp .env.example .env
+for windows - use copy instead of cp.
 ```
-Open `.env` and configure `GROQ_API_KEY` and `GOOGLE_API_KEY`.
+Open `.env` and configure `GROQ_API_KEY`.
 
 ### Step 2: Run the Web Dashboard
 To launch the visual Streamlit interface:
@@ -77,7 +76,7 @@ streamlit run streamlit_app.py
 ```
 The application will be accessible at `http://localhost:8501`.
 
----
+
 
 ## WhatsApp Integration Setup
 
