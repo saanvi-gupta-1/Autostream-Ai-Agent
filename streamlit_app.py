@@ -237,6 +237,20 @@ def process_pending():
 # ─── main ───
 def main():
     init_session()
+
+    # Floating WhatsApp Button matching user's image exactly
+    st.markdown("""
+        <a href="https://wa.me/910000000000" target="_blank" class="floating-wa">
+            <div class="wa-icon-wrapper">
+                <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#0c4a6e;margin-top:2px;">
+                    <text x="14.5" y="14" font-size="7" font-weight="900" font-family="Arial" text-anchor="middle">24/7</text>
+                    <path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-.9.2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.5-1.1-.7-2.3-.7-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/>
+                </svg>
+            </div>
+            <span style="color:white">+</span><span class="wa-number">91</span> 000 000 0000
+        </a>
+    """, unsafe_allow_html=True)
+
     render_sidebar()
     render_chat()
 

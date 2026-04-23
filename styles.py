@@ -325,6 +325,47 @@ PREMIUM_CSS = """
     footer { visibility: hidden; }
     .stDeployButton { display: none; }
     .stHtml { height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
+
+    /* ══════ FLOATING WHATSAPP BUTTON ══════ */
+    .floating-wa {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #0c829e;
+        color: #ffffff;
+        border-radius: 50px;
+        padding: 6px 20px 6px 6px;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.8);
+        z-index: 999999;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        letter-spacing: 0.5px;
+    }
+    .floating-wa:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,1);
+        color: #ffffff;
+    }
+    .wa-icon-wrapper {
+        background: white;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        box-shadow: inset 0 0 0 2px #0c4a6e;
+    }
+    .wa-number {
+        color: #7dd3fc;
+        margin-right: 4px;
+    }
 </style>
 """
 
