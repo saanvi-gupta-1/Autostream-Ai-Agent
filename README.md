@@ -189,63 +189,18 @@ User: "rahul@example.com"
 
 ---
 
-## WhatsApp Deployment via Webhooks
+## 8. WhatsApp Integration (REQUIRED)
 
-To deploy this agent on WhatsApp, the **WhatsApp Business Cloud API** (Meta) with a webhook architecture would be used:
+### WhatsApp Integration (Concept)
 
-### Architecture
+The agent can be integrated with WhatsApp using:
 
-```
-WhatsApp User
-      |
-      V (sends message)
-WhatsApp Cloud API
-      |
-      V HTTP POST (webhook event)
-Webhook Server  <-- FastAPI / Flask endpoint
-      |
-      |-- Validate X-Hub-Signature-256
-      |-- Extract sender phone number + message text
-      |-- Load session state from Redis (keyed by phone number)
-      |-- Run LangGraph agent with graph.invoke(state)
-      |-- Save updated state back to Redis
-      +-- POST reply to WhatsApp Cloud API
-            |
-            V
-      WhatsApp User receives response
-```
+- Webhooks via Meta WhatsApp Business API
+- Incoming messages → sent to backend API
+- Backend processes using agent
+- Response sent back via webhook response
 
-### Implementation Steps
-
-1. **Register a Meta Developer App** and enable the WhatsApp Business API with a verified business number.
-
-2. **Create a Webhook Endpoint** using FastAPI:
-
-```python
-@app.post("/webhook")
-async def whatsapp_webhook(request: Request):
-    body = await request.json()
-
-    message = body["entry"][0]["changes"][0]["value"]["messages"][0]
-    phone = message["from"]
-    text = message["text"]["body"]
-
-    state = redis_client.get(f"session:{phone}") or get_initial_state()
-
-    state["messages"].append({"role": "user", "content": text})
-    updated_state = graph.invoke(state)
-
-    redis_client.set(f"session:{phone}", json.dumps(updated_state), ex=3600)
-
-    reply = updated_state["messages"][-1]["content"]
-    send_whatsapp_message(phone, reply)
-
-    return {"status": "ok"}
-```
-
-3. **Persist Per-User State** using Redis keyed by phone number for isolated multi-turn memory with automatic session expiry.
-
-4. **Deploy** on a cloud platform (AWS Lambda, Railway, or Render) with HTTPS for Meta webhook verification.
+This allows real-time conversational lead generation on WhatsApp.
 
 ---
 
