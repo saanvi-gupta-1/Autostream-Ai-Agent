@@ -66,14 +66,26 @@ def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
     )
 
 
+FAISS_INDEX_PATH = Path(__file__).parent / "knowledge_base" / "faiss_index"
+
 def build_vectorstore() -> FAISS:
     global _vectorstore
     if _vectorstore is not None:
         return _vectorstore
 
-    docs = _build_documents()
     embeddings = _get_embeddings()
+
+    # Try loading from local disk first to avoid re-embedding
+    if os.path.exists(FAISS_INDEX_PATH):
+        try:
+            _vectorstore = FAISS.load_local(str(FAISS_INDEX_PATH), embeddings, allow_dangerous_deserialization=True)
+            return _vectorstore
+        except Exception:
+            pass
+
+    docs = _build_documents()
     _vectorstore = FAISS.from_documents(docs, embeddings)
+    _vectorstore.save_local(str(FAISS_INDEX_PATH))
     return _vectorstore
 
 

@@ -3,7 +3,7 @@ import json
 import logging
 from typing import Dict, Any
 import requests
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, BackgroundTasks
 from dotenv import load_dotenv
 
 # Load agent logic
@@ -92,7 +92,7 @@ async def verify_webhook(request: Request):
 
 
 @app.post("/webhook")
-async def receive_message(request: Request):
+async def receive_message(request: Request, background_tasks: BackgroundTasks):
     """
     Receive incoming messages from WhatsApp.
     """
@@ -114,32 +114,37 @@ async def receive_message(request: Request):
                             
                             logger.info(f"Received message from {phone_number}: {text}")
                             
-                            # 1. Load session
-                            state = get_session(phone_number)
-                            
-                            # 2. Append user message
-                            state["messages"].append({"role": "user", "content": text})
-                            
-                            # 3. Invoke LangGraph
-                            try:
-                                updated_state = graph.invoke(state)
-                                save_session(phone_number, updated_state)
-                                
-                                # 4. Get AI reply
-                                reply = updated_state["messages"][-1]["content"]
-                                
-                                # 5. Send reply back to WhatsApp
-                                send_whatsapp_message(phone_number, reply)
-                                
-                            except Exception as e:
-                                logger.error(f"Error processing message: {e}")
-                                send_whatsapp_message(
-                                    phone_number, 
-                                    "I'm sorry, I'm having a temporary issue processing your request."
-                                )
+                            # Add to background tasks to return 200 OK immediately and prevent latency/timeout issues
+                            background_tasks.add_task(process_message_background, phone_number, text)
 
     # Always return 200 OK to Meta to acknowledge receipt
     return Response(status_code=200)
+
+def process_message_background(phone_number: str, text: str):
+    """Process the message through LangGraph in the background."""
+    try:
+        # 1. Load session
+        state = get_session(phone_number)
+        
+        # 2. Append user message
+        state["messages"].append({"role": "user", "content": text})
+        
+        # 3. Invoke LangGraph
+        updated_state = graph.invoke(state)
+        save_session(phone_number, updated_state)
+        
+        # 4. Get AI reply
+        reply = updated_state["messages"][-1]["content"]
+        
+        # 5. Send reply back to WhatsApp
+        send_whatsapp_message(phone_number, reply)
+        
+    except Exception as e:
+        logger.error(f"Error processing message: {e}")
+        send_whatsapp_message(
+            phone_number, 
+            "I'm sorry, I'm having a temporary issue processing your request."
+        )
 
 @app.get("/")
 async def health_check():
